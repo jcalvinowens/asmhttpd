@@ -1,0 +1,48 @@
+The macro should be invoked as follows:
+	syscall(#,arg1,arg2,arg3,arg4,arg5,arg6)
+
+Error checking is built into the macro. You _MUST_ define an error-handler.
+If the syscall() macro is invoked without an error handler defined, the 
+assembler will throw an error.
+
+You define error handlers like this:
+
+ech(label_for_your_error_code)
+; do shit
+ech(other_label_for_stuff)
+
+The error checking consists of:
+	or rax,rax
+	js @ERROR_HANDLER
+So, the FLAGS are set based on the error return of the syscall, which is nice.
+
+If for some reason you don't want error checking, you can do that like this:
+ech(0)
+; do un-error-checked stuff
+ech(whatever)
+You'll get a warning during assembly for every non-error-checked syscall()
+
+Do remember that if you don't define an error-handler at the beginning of a
+file, you'll just inherit the last definition from the previous file, which
+is probably not what you want. Even if it is, ech() is an assemble-time macro, 
+so there's no real detriment to redefining it at the beginning of every file.
+This is also good in case files get re-ordered in master.asm.
+
+The arguments are loaded with 32-bit 'mov' by default.
+You can change that in the following ways:
+	+arg	: Load arg with a 64-bit 'mov'
+	^arg	: Load arg with a 32-bit 'mov' (redundant in this usage)
+	^^arg	: Load arg with a 16-bit 'mov'
+	^^^arg	: Load arg with an 8-bit 'mov'
+	[arg]	: Load arg with 'lea' (eg, "lea rdi,[arg]")
+	+[arg]	: Dereference arg and load (eg, "mov rdi,[arg]")
+	^[arg]
+	^^[arg]
+	^^^[arg]
+	[+arg]	: Discard brackets and load with 'mov' (eg, "mov rdi,arg")
+	[^arg]	  (This functionality is stupid, and is likely to be removed soon)
+	[^^arg]
+	[^^^arg]
+	NULL	: Make the argument NULL (Always 64-bit, eg "xor rdi,rdi")
+	(blank) : Don't do anything for that argument (as arg2 in, "syscall(#,arg1,,arg3)"
+Note that the syscall number ("#" in the example) is also expanded in this fashion

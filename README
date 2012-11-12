@@ -1,0 +1,45 @@
+NanoHTTPd - the tiniest, most secure webserver ever written
+===============================================================================
+Write cool stuff here
+----------------
+HOW TO BUILD:
+	Just run "make". You will need NASM on your system.
+----------------
+HOW TO RUN:
+	The binary is executed as follows:
+		nanohttpd -r "http-root" [-u uid] [-a addr] [-p port] [-i index]
+	
+	The arguments mean as follows:
+		* "http-root": 	The directory to be treated as the root for
+				serving HTTP requests.
+		* [uid]		The user/group ID to drop privleges to. If
+				omitted, (unsigned int)(-1) is assumed.
+		* [addr]	Address to bind to to listen for requests.
+				INADDR_ANY is assumed if omitted.
+		* [port]	Port to bind to to listen for requests. :80 is
+				assumed if this is omitted.
+		* [index]	File, relative to "http-root", to serve to
+				clients on "GET /". Otherwise, "GET /" will
+				return "204 NO CONTENT" to clients.
+	
+	It should be noted that parsing command line arguments in assembly is a
+	gigantic pain in the ass. If you want more options, you can go add them
+	yourself. ;-)
+----------------
+You may find this source code confusing, which is a direct result of the fact
+that it's REALLY FUCKING CONFUSING. My attempts to justify this confusion are
+as follows:
+	Q: Why the fuck do you #include all the source files into one file?
+	A: The linker doesn't handle code written like this very well. Twice, I
+	   spent a significant amount of time chasing bugs that turned out to
+	   be due to the linker incorrectly optimizing out chunks of code.
+	   It was also extremely annoying to have to declare tons and tons of
+	   variables "extern", and this avoids that.
+	Q: What's up with that insane syscall macro?
+	A: You can find an explanation of how to use it in the /src folder.
+	   Once you get the hang of it, it makes understanding the program a
+	   whole lot easier.
+	Q: Why do you use NASM? Everybody hates Intel syntax
+	A: I learned the Intel syntax, so it's much more natural for me to code
+	   in that dialect. If you want AT&T syntax, run `objdump -d` on the
+	   compiled binary.
