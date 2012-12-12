@@ -7,20 +7,20 @@
 	mov rax,%1                             ; The file's length to convert (as an unsigned quadword)
 	mov ecx,16                             ; Counter for the conversion loop
 	lea rsi,[DecAsciiConvTable]	       ; Address of table for ASCII conversion
-	mov %1,0x199999999999999a              ; Multiplicative inverse of 10d (0xa)
-	xor %2,%2                              ; Zero out registers for the ASCII string
-	xor %3,%2                            
+	mov %2,0x199999999999999a              ; Multiplicative inverse of 10d (0xa)
+	xor %3,%3                              ; Zero out registers for the ASCII string
+	xor %4,%4 
 	
 	%%division_loop:
-		shld %2,%3,8                           ; Shift the most significant byte of r10 into r9
-		shl %3,8                               ; (shld only shifts in, not out, so we have to discard the byte)
-		mul %1                                 ; Execute the division
+		shld %3,%4,8                           ; Shift the most significant byte of r10 into r9
+		shl %4,8                               ; (shld only shifts in, not out, so we have to discard the byte)
+		mul %2                                 ; Execute the division
 		shr rax,60                             ; Shift the most significant byte of the remainder to the least
 		movzx rax,byte [rsi+rax]               ; Load the value from our conversion table
-		or %3,rax                              ; Store the new value in r10
+		or %4,rax                              ; Store the new value in r10
 		mov rax,rdx                            ; Restore the working quotient for the next iteration
 		loop %%division_loop                   ; ...and do it again
 	
-	mov [%4],%3                            ; Store the ASCII decimal value in memory
-	mov [%4+8],%2
+	mov [%5],%4                            ; Store the ASCII decimal value in memory
+	mov [%5+8],%3
 %endmacro
