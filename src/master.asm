@@ -33,6 +33,7 @@ segment .text
 %include "src/http-actions.asm"		; Labels for HTTP actions (eg DieError404)
 %include "src/handle-error.asm"		; Error handlers go here
 
+_start:
 %include "src/init.asm"			; Where execution starts (_start is here)
 %include "src/serve-http.asm"		; The loop that calls accept() and clone()s off for connections
 %include "src/handle-connection.asm"	; Beginning of each thread for each connection
