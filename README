@@ -1,34 +1,23 @@
 NanoHTTPd - the tiniest, most secure webserver ever written
-===============================================================================
+================================================================================
 Write cool stuff here
 ----------------
 HOW TO BUILD:
 	Just run "make". You will need NASM on your system.
 ----------------
-HOW TO RUN:
-	The binary is executed as follows:
-		nanohttpd -r "http-root" [-u uid] [-a addr] [-p port] [-i index]
-	
-	The arguments mean as follows:
-		* "http-root": 	The directory to be treated as the root for
-				serving HTTP requests.
-		* [uid]		The user/group ID to drop privleges to. If
-				omitted, (unsigned int)(-1) is assumed.
-		* [addr]	Address to bind to to listen for requests.
-				INADDR_ANY is assumed if omitted.
-		* [port]	Port to bind to to listen for requests. :80 is
-				assumed if this is omitted.
-		* [index]	File, relative to "http-root", to serve to
-				clients on "GET /". Otherwise, "GET /" will
-				return "204 NO CONTENT" to clients.
-	
-	It should be noted that parsing command line arguments in assembly is a
-	gigantic pain in the ass. If you want more options, you can go add them
-	yourself. ;-)
-----------------
 You may find this source code confusing, which is a direct result of the fact
 that it's REALLY FUCKING CONFUSING. My attempts to justify this confusion are
 as follows:
+	Q: Why is this thing the "most secure ever"? Do I even know you?
+	A: The classic unintentional vulnerability that plagues x86 code is the
+	   stack-smash: you leverage a buffer overflow of a stack variable to
+	   overwrite return addresses on the stack, thereby gaining control of
+	   the execution of the program. Nanohttpd has no stack, because
+	   Nanohttpd has no functions, and thus such an attack becomes
+	   impossible. It chroots itself into its webroot, drops privilages, and
+	   never opens any file descriptor for writing. That doesn't mean there
+	   aren't any bugs (heh heh), but where there are bugs they should be
+	   rather docile.
 	Q: Why the fuck do you #include all the source files into one file?
 	A: The linker doesn't handle code written like this very well. Twice, I
 	   spent a significant amount of time chasing bugs that turned out to
