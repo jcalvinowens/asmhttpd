@@ -1,25 +1,28 @@
-_start:
 ech(HandleInitSysError)
 
-; We need to ignore SIGPIPE, since the default action is to terminate
+; Change and chroot to the webroot
+syscall(_sys_chdir,[ChrootDirectory])
+syscall(_sys_chroot,[ChrootDirectory])
+
+; Ignore SIGPIPE
 syscall(_sys_rt_sigaction,13,[Sighand_SIGPIPE],NULL,8)
 
-; Chroot ourselves into the http root
-syscall(_sys_chdir,[ChrootDirectory])
-syscall(_sys_chroot,)
-
-; Open the server socket
+; Create, bind to, and listen on socket
 syscall(_sys_socket,2,1,NULL)
-mov r12,rax	; Save the socket file descriptor
-syscall(_sys_bind,+r12,[SocketAddress],24)
-syscall(_sys_listen,,1000)
+mov rdi,rax
+syscall(_sys_bind,,[SocketAddress], 24)
+syscall(_sys_listen,,1024)
 
-; Drop privs
+mov r8,rdi
+
+; Drop privlages
 syscall(_sys_setgid,1000)
 syscall(_sys_setuid,)
 
-; Daemonize
+; Fork away from calling TTY
 syscall(_sys_fork)
-jnz DieInitUnforked
+jz ServeHTTP
 
-; Fall through to serve-http.asm
+syscall(_sys_exit,NULL)
+
+;; Fall through to ServeHTTP

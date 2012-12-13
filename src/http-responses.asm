@@ -1,3 +1,10 @@
+Response200:
+	db "HTTP/1.1 200 OK",0x0d,0x0a
+%define lenResponse200 17
+Header12:
+	db "Content-Length: "
+%define lenHeader12 16
+
 Error400:
 	db "HTTP/1.1 400 Bad Request",0x0d,0x0a,0x0d,0x0a
 %define lenError400 28

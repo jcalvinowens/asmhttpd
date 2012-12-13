@@ -1,53 +1,71 @@
-HandleConnection:
+;; (rbx contains client connection file descriptor)
 
+HandleConnection:
 ech(HandleGeneralSysError)
 
 syscall(_sys_mmap,NULL,32768,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS|MAP_NORESERVE,NULL,NULL)
-mov rbp,rax	; Save the address of our memory block
-		; XXX: tmalloc() uses rbp, so don't touch it
+mov rbp,rax	; Store offset for tmalloc() macro
 
 tmalloc(PollStruct,8)
 
-mov dword [PollStruct],ebx	; Build the struct used by the poll() syscall
-mov dword [PollStruct+4],POLLIN	; We're looking for input
+; Build a struct pollfd in memory
+mov [PollStruct],rbx
+mov dword [PollStruct+4],1
 
-xor r15,r15	; Count number of poll/read loops
-xor r14,r14	; Count number of bytes read
+tmalloc(ClientRequest,1024)
 
-.ReceiveRequest:
-syscall(_sys_poll,[PollStruct],1,GLOBAL_REQUEST_TIMEOUT)
-jz .NoData
+; Load offset and counter for receieve loop
+lea r9,[ClientRequest]
+mov r10d,1024
 
-tmalloc(HttpRequest,GLOBAL_MAX_HTTP_REQLEN)
+ReceiveRequest:
 
-syscall(_sys_read,+rbx,[HttpRequest],lenHttpRequest)
+syscall(_sys_poll,[+PollStruct],1,5000)
+jz DieError408
+
+syscall(_sys_read,+rbx,+r9,+r10)
+
+cmp rax,18		; If we got too few bytes to be valid...
+jl ReceiveRequest	; ...go wait for more.
 jz DieClientDisconnected
 
-inc r15
-add r14,rax
-cmp r14d,16
-jle .ReceiveRequest
+mov esi,0x0a0d0a0d
+lea rdi,[r9+rax-4]
+lea r8,[ClientRequest]
 
-lea rdi,[HttpRequest+r14-3]
-lea rcx,[rax+3]	; NRAA
-mov al,0x0d
+.FindTerminator:
+cmp esi,dword [rdi]
+je short .FoundTerminator
 
-.FindReqEnd:
+dec rdi		; If we haven't reached the beginning...
+cmp rdi,r8	; ...then keep looking
+jne short .FindTerminator
+
+add r9,rax	; Adjust offset and counter
+sub r10,rax
+jz DieError414	; If zero, send 412 REQUEST URI TOO LARGE
+
+jmp ReceiveRequest	; Go back up and wait for more data
+
+.FoundTerminator:
+lea r15,[rdi+3]		; Store the last byte of the request
+lea r14,[r9+rax]	; Store last byte received from client
+
+; Skip past the METHOD specification, find the start of the URI:
+mov eax,0x20
+lea rdi,[ClientRequest]
+mov ecx,20
 repne scasb
-jne .ReceiveRequest
+jne DieError400		; Go thou and fuck with me no more
 
-mov esi, dword [rdi-1]
-cmp esi, 0x0a0d0a0d	; Little endian
-je .GotReq
-jmp short .FindReqEnd
+mov r13,rdi
 
-.NoData:
-or r15,r15
-jz DieError408	; Never got anything - 408 Request Timed Out
-jnz DieError400	; Got bullshit - 400 Bad Request
+; NULL-terminate the filename
+mov ecx,1024
+repne scasb
+jne DieError400		; This should never happen
 
-.GotRequest
-mov r15,[rdi+3]		
-sub r15,r14		; Length of request
-lea r14,[rdi+3]		; Address of data (if any)
-mov r13,r14		; Total length of received data
+mov byte [rdi-1],0x00
+lea r12,[rdi-1]		; Store addr of last byte of URI
+
+;; Fall through
