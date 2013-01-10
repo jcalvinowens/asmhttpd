@@ -95,7 +95,14 @@ mov dword [rdi], 0x0a0d0a0d	; Terminate the HTTP response
 lea rdx,[rdi+4]	; Address from which to send response plus 4...
 sub rdx,rsp	; ...and subtract the end to get the length
 syscall(_sys_sendto,+rbx,[+rsp],,0x8000,NULL,NULL)
-syscall(_sys_sendfile,+rbx,+r13,NULL,+r12)
+
+xor r9,r9
+
+keep_sending:
+syscall(_sys_sendfile,+rbx,+r13,+r9,+r12)
+add r9,rax
+sub r12,rax
+jnz keep_sending
 
 syscall(_sys_close,+r13)
 syscall(_sys_close,+rbx)
