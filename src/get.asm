@@ -96,11 +96,8 @@ lea rdx,[rdi+4]	; Address from which to send response plus 4...
 sub rdx,rsp	; ...and subtract the end to get the length
 syscall(_sys_sendto,+rbx,[+rsp],,0x8000,NULL,NULL)
 
-xor r9,r9
-
 keep_sending:
-syscall(_sys_sendfile,+rbx,+r13,+r9,+r12)
-add r9,rax
+syscall(_sys_sendfile,+rbx,+r13,NULL,+r12)
 sub r12,rax
 jnz keep_sending
 
