@@ -1,4 +1,4 @@
-NanoHTTPd - the tiniest, most secure webserver ever written
+AsmHTTPd - the tiniest, most secure webserver ever written
 ================================================================================
 Write cool stuff here
 ----------------
@@ -12,8 +12,8 @@ as follows:
 	A: The classic unintentional vulnerability that plagues x86 code is the
 	   stack-smash: you leverage a buffer overflow of a stack variable to
 	   overwrite return addresses on the stack, thereby gaining control of
-	   the execution of the program. Nanohttpd has no stack, because
-	   Nanohttpd has no functions, and thus such an attack becomes
+	   the execution of the program. Asmhttpd has no stack, because
+	   Asmhttpd has no functions, and thus such an attack becomes
 	   impossible. It chroots itself into its webroot, drops privilages, and
 	   never opens any file descriptor for writing. That doesn't mean there
 	   aren't any bugs (heh heh), but where there are bugs they should be

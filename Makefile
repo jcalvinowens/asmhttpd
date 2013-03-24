@@ -1,6 +1,6 @@
 asmhttpd:
-	nasm -f elf64 -O0 -o ./nanohttpd.o src/master.asm
-	ld nanohttpd.o -o nanohttpd
+	nasm -f elf64 -O0 -o ./asmhttpd.o src/master.asm
+	ld asmhttpd.o -o asmhttpd
 
 clean:
-	rm nanohttpd.o nanohttpd
+	rm asmhttpd.o asmhttpd

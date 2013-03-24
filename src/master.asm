@@ -1,4 +1,4 @@
-; nanohttpd: A minimalist HTTP webserver for Linux, written in x86_64 assembly.
+; asmhttpd: A minimalist HTTP webserver for Linux, written in x86_64 assembly.
 ; Copyright (C) 2013 Calvin Owens
 ;
 ; This program is free software: you can redistribute it and/or modify it
