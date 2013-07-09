@@ -29,9 +29,9 @@ inc r9	; Increment the counter
 jmp short ExpandChar	; ...and do it again
 
 ExpandOut:
-mov [r8+r9*8],rdi	; Store the offset of the last byte of the URI
 or r9,r9	; If r9 is zero...
 jz ExpandDone	; ...then there was nothing to un-escape - jump over copying
+mov [r8+r9*8],rdi	; Store the offset of the last byte of the URI
 
 xor rax,rax	; Zero out rax (index register for the loop)
 mov rdi,[r8]	; Get the offset of the first un-escaped literal
