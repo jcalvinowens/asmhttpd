@@ -4,11 +4,15 @@ xor r9,r9
 mov eax,0x25	; '%' in ASCII
 mov rcx,r12	; Counter for 'repne scasb'...
 sub rcx,r13	; ...subtract from end to get length
+cmp rcx,3	; If there are less than 3 characters...
+jl ExpandDone	; ...there can't be anything to unescape
 mov rdi,r13	; Beginning of URI
 
 ExpandChar:
 repne scasb	; Search for a '%' character
 jne ExpandOut	; ...if we didn't find one, we're done
+cmp rcx,1	; If there are less than 2 characters left...
+jle ExpandOut	; ...don't try to unescape
 movzx rdx,word [rdi]	; Pull the ASCII-encoded hex byte into dx
 ror dl,4	; You are not expected to understand this
 ror dx,4
@@ -19,7 +23,7 @@ add dl,dh
 shl dh,3
 or dl,dh
 mov [rdi-1],dl	; Overwrite the '%' character with the newly-unescaped byte
-;mov word [rdi],r10w	; Write NULL's over the just-unescaped ASCII-encoded hex
+mov word [rdi],r10w	; Write NULL's over the just-unescaped ASCII-encoded hex
 mov [r8+r9*8],rdi	; Add the address to our list of unescaped literals
 inc r9	; Increment the counter
 jmp short ExpandChar	; ...and do it again
