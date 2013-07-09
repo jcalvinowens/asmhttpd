@@ -1,34 +1,44 @@
 AsmHTTPd - the tiniest, most secure webserver ever written
 ================================================================================
-Write cool stuff here
-----------------
 HOW TO BUILD:
 	Just run "make". You will need NASM on your system.
 ----------------
-You may find this source code confusing, which is a direct result of the fact
-that it's REALLY FUCKING CONFUSING. My attempts to justify this confusion are
-as follows:
+HOW TO RUN:
+	./asmhttpd
+----------------
+Frequently asked questions:
 	Q: Why is this thing the "most secure ever"? Do I even know you?
 	A: The classic unintentional vulnerability that plagues x86 code is the
 	   stack-smash: you leverage a buffer overflow of a stack variable to
 	   overwrite return addresses on the stack, thereby gaining control of
 	   the execution of the program. Asmhttpd has no stack, because
 	   Asmhttpd has no functions, and thus such an attack becomes
-	   impossible. It chroots itself into its webroot, drops privilages, and
-	   never opens any file descriptor for writing. That doesn't mean there
-	   aren't any bugs (heh heh), but where there are bugs they should be
-	   rather docile.
-	Q: Why the fuck do you #include all the source files into one file?
+	   impossible.
+	Q: But isn't syscall() a function?
+	A: No, it's a macro. See doc/syscall-macro.txt for information on its
+	   usage. It's pretty much the epitome of preprocessor clusterfuck.
+	Q: Why are all the source files #included into a single file?
 	A: The linker doesn't handle code written like this very well. Twice, I
 	   spent a significant amount of time chasing bugs that turned out to
 	   be due to the linker incorrectly optimizing out chunks of code.
-	   It was also extremely annoying to have to declare tons and tons of
-	   variables "extern", and this avoids that.
-	Q: What's up with that insane syscall macro?
-	A: You can find an explanation of how to use it in the /src folder.
-	   Once you get the hang of it, it makes understanding the program a
-	   whole lot easier.
-	Q: Why do you use NASM? Everybody hates Intel syntax
-	A: I learned the Intel syntax, so it's much more natural for me to code
-	   in that dialect. If you want AT&T syntax, run `objdump -d` on the
-	   compiled binary.
+	Q: Why do you use NASM?
+	A: If I did this now, I would probably just have it compile with GCC,
+	   but I didn't know any better back when I wrote it.
+	Q: Can this run on 32-bit x86en?
+	A: No. It may be portable to x86-32, but I really have no idea how that
+	   works. Feel free to try.
+	Q: Do you plan on porting this to other CPU architectures?
+	A: "Porting" is really a misnomer here, since about 90% of the code
+	   would have to be rewritten. I've been meaning to learn ARM assembly
+	   for a long time now, and that might be a good way to do it. But I
+	   don't see that happening anytime in the near future...
+----------------
+REPORTING BUGS:
+	Bug reports are greatly appreciated! The most useful information is the
+	line that probably got printed in `dmesg`, which shows the address of
+	the instruction which caused the segfault. Core dumps are not of much
+	use, but send them if you have them. If the bug doesn't crash the
+	daemon, send me a very detailed description of what you did to cause
+	the issue.
+
+	My E-Mail is: jcalvinowens@gmail.com

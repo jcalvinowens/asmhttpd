@@ -3,7 +3,7 @@ Sighand_SIGPIPE:
 	dq 0x0000000000000000           ; FIXME: This works, but probably isn't right...
 
 ChrootDirectory:
-	db "/public/www",0x00 ; The directory we chroot() to before beginning to serve
+	db "/var/www",0x00 ; The directory we chroot() to before beginning to serve
 
 SocketAddress:
 	dw 0x0002			; AF_INET is 2 (AF_INET6 is 0xa)
