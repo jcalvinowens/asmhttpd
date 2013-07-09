@@ -3,4 +3,4 @@ asmhttpd:
 	ld asmhttpd.o -o asmhttpd
 
 clean:
-	rm asmhttpd.o asmhttpd
+	rm -rf asmhttpd.o asmhttpd
