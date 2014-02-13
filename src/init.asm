@@ -1,8 +1,34 @@
 ech(HandleInitSysError)
 
+; Parse command line arguments. At the start of the program, [rsp] contains a
+; qword that tells us how many arguments we got, and [rsp+8] contains a pointer
+; to the array of NULL-terminated strings representing the arguments.
+
+; Make sure we have 2 arguments:
+;	0:	Executable name (we ignore this)
+;	1:	Webroot
+mov r11,[rsp]
+cmp r11,2
+jl HandleInitSysError
+
+; Okay, find the arg
+mov r11,[rsp+8]
+xor rcx,rcx
+
+.FindNULL:
+movzx r12, byte [r11+rcx]
+test r12,r12
+jz .GotNULL
+inc rcx
+jmp .FindNULL
+
+.GotNULL:
+; Okay, we got the webroot argument. Even if somebody is screwing with us, we
+; know it will be NULL-terminated, so just pass it to chdir() and chroot()
+
 ; Change and chroot to the webroot
-syscall(_sys_chdir,[ChrootDirectory])
-syscall(_sys_chroot,[ChrootDirectory])
+syscall(_sys_chdir,[r11+rcx+1])
+syscall(_sys_chroot,)
 
 ; Ignore SIGPIPE
 syscall(_sys_rt_sigaction,13,[Sighand_SIGPIPE],NULL,8)
@@ -15,8 +41,8 @@ syscall(_sys_listen,,1024)
 
 mov r8,rdi
 
-; Drop privlages
-syscall(_sys_setgid,1000)
+; Drop privs (Nobody)
+syscall(_sys_setgid,65535)
 syscall(_sys_setuid,)
 
 ; Fork away from calling TTY
