@@ -28,6 +28,7 @@ global _start
 segment .data
 %include "src/static-data.asm"		; The data segment - it's all here.
 %include "src/http-responses.asm"	; Contains canned HTTP headers and the like
+DATASEGMENT_END: db 0x00
 
 segment .text
 %include "src/http-actions.asm"		; Labels for HTTP actions (eg DieError404)
@@ -39,3 +40,4 @@ _start:
 %include "src/handle-connection.asm"	; Beginning of each thread for each connection
 
 %include "src/get.asm"			; Code for the GET method (and HEAD)
+ud2					; Force SIGILL if code runs away somehow

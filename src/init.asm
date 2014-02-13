@@ -45,6 +45,24 @@ mov r8,rdi
 syscall(_sys_setgid,65535)
 syscall(_sys_setuid,)
 
+; .data is higher than .text in virtual memory. Calculate the address of the
+; first unused page after .data
+lea rdi,[DATASEGMENT_END]
+shr rdi,12
+inc rdi
+shl rdi,12
+
+; Now, calculate the page-size-aligned length from the end of .data to the top
+; of the userspace addresses (See: http://en.wikipedia.org/wiki/X86-64)
+mov rsi,0x00007fffffffffff
+sub rsi,rdi
+shr rsi,12
+dec rsi
+shl rsi,12
+
+; Do the munmap() call. This unmaps the stack, which we no longer need.
+syscall(_sys_munmap,,)
+
 ; Fork away from calling TTY
 syscall(_sys_fork)
 jz ServeHTTP
