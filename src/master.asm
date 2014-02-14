@@ -1,5 +1,5 @@
 ; asmhttpd: A minimalist HTTP webserver for Linux, written in x86_64 assembly.
-; Copyright (C) 2013 Calvin Owens
+; Copyright (C) 2014 Calvin Owens
 ;
 ; This program is free software: you can redistribute it and/or modify it
 ; under the terms of version 2 of the GNU General Public License as published
@@ -17,7 +17,7 @@
 global _start
 
 %include "inc/global-constants.inc"	; Global configurable constants
-%include "inc/syscalls.inc"		; Contains _sys_whatever macros
+%include "inc/syscalls.inc"		; Contains sys_whatever macros
 %include "inc/errno.inc"		; ERRNO definitions
 %include "inc/flags.inc"		; Flags for system calls
 
@@ -25,7 +25,7 @@ global _start
 %include "lib/math-lib.asm"		; Canned math
 %include "lib/mem-lib.asm"		; tmalloc() definition
 
-segment .data
+segment .rodata
 %include "src/static-data.asm"		; The data segment - it's all here.
 %include "src/http-responses.asm"	; Contains canned HTTP headers and the like
 DATASEGMENT_END: db 0x00

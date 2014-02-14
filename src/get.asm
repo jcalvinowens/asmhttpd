@@ -57,12 +57,22 @@ ExpandDone:
 
 tmalloc(StatStruct,144)
 
-syscall(_sys_stat,+r13,[StatStruct])
-syscall(_sys_open,+r13,NULL,NULL)
+syscall(sys_stat,+r13,[StatStruct])
 
-mov r13,rax	; Save file descriptor
+; Make sure we have a regular file or a symlink
+mov r12w,[StatStruct+24]	; Get the file mode
+shr r12w,14
+cmp r12w,2
+jne DieError403
 
 mov r12,[StatStruct+48]	; Get the file size out of the struct from stat()
+
+syscall(sys_open,+r13,NULL,NULL)
+mov r13,rax	; Save file descriptor
+
+ech(HandleGeneralSysErrorAfterOpen)	; Now if we crash we have to close the file to
+					; avoid leaking file descriptors
+
 lea rsp,[rbp+thread_memory_offset]	; Get scratch space, store it in rsp for awhile
 
 ; Convert the filesize to ASCII
@@ -98,13 +108,17 @@ mov dword [rdi], 0x0a0d0a0d	; Terminate the HTTP response
 
 lea rdx,[rdi+4]	; Address from which to send response plus 4...
 sub rdx,rsp	; ...and subtract the end to get the length
-syscall(_sys_sendto,+rbx,[+rsp],,0x8000,NULL,NULL)
+syscall(sys_sendto,+rbx,[+rsp],,0x8000,NULL,NULL)
 
 keep_sending:
-syscall(_sys_sendfile,+rbx,+r13,NULL,+r12)
+syscall(sys_sendfile,+rbx,+r13,NULL,+r12)
 sub r12,rax
 jnz keep_sending
 
-syscall(_sys_close,+r13)
-syscall(_sys_close,+rbx)
-syscall(_sys_exit,NULL)
+; Close file descriptor and socket
+syscall(sys_close,+r13)
+syscall(sys_close,+rbx)
+
+; Deallocate thread-local memory and exit
+syscall(sys_munmap,+rbp,32768)
+syscall(sys_exit,NULL)

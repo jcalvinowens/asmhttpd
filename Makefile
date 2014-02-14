@@ -1,3 +1,5 @@
+# The lamest makefile ever
+
 asmhttpd:
 	nasm -f elf64 -O0 -o ./asmhttpd.o src/master.asm
 	ld asmhttpd.o -o asmhttpd

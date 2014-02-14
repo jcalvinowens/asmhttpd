@@ -3,7 +3,7 @@
 HandleConnection:
 ech(HandleGeneralSysError)
 
-syscall(_sys_mmap,NULL,32768,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS|MAP_NORESERVE,NULL,NULL)
+syscall(sys_mmap,NULL,32768,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS|MAP_NORESERVE,NULL,NULL)
 mov rbp,rax	; Store offset for tmalloc() macro
 
 tmalloc(PollStruct,8)
@@ -20,14 +20,14 @@ mov r10d,1024
 
 ReceiveRequest:
 
-syscall(_sys_poll,[+PollStruct],1,5000)
+syscall(sys_poll,[+PollStruct],1,60000)
 jz DieError408
 
-syscall(_sys_read,+rbx,+r9,+r10)
+syscall(sys_read,+rbx,+r9,+r10)
+jz DieClientDisconnected
 
 cmp rax,18		; If we got too few bytes to be valid...
 jl ReceiveRequest	; ...go wait for more.
-jz DieClientDisconnected
 
 mov esi,0x0a0d0a0d
 lea rdi,[r9+rax-4]

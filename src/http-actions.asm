@@ -1,8 +1,9 @@
 ech(0)	; Who shall catch the catchers?
 
 DieClientDisconnected:
-syscall(_sys_close,+rbx)
-syscall(_sys_exit,-1)
+syscall(sys_close,+rbx)
+syscall(sys_munmap,+rbp,32768)
+syscall(sys_exit,-1)
 
 DieError403:
 lea rcx,[Error403]
@@ -35,6 +36,7 @@ mov edx,lenError400
 jmp __die
 
 __die:
-syscall(_sys_write,+rbx,+rcx,+rdx)
-syscall(_sys_close,+rbx)
-syscall(_sys_exit,-1);
+syscall(sys_write,+rbx,+rcx,+rdx)
+syscall(sys_close,+rbx)
+syscall(sys_munmap,+rbp,32768)
+syscall(sys_exit,-1);

@@ -1,39 +1,56 @@
-AsmHTTPd - the tiniest, most secure webserver ever written
+asmhttpd - The tiniest, most secure webserver ever written
 ================================================================================
 HOW TO BUILD:
+-------------
 	Just run "make". You will need NASM on your system.
-----------------
+
 HOW TO RUN:
-	./asmhttpd
-----------------
-Frequently asked questions:
-	Q: Why is this thing the "most secure ever"? Do I even know you?
-	A: The classic unintentional vulnerability that plagues x86 code is the
-	   stack-smash: you leverage a buffer overflow of a stack variable to
-	   overwrite return addresses on the stack, thereby gaining control of
-	   the execution of the program. Asmhttpd has no stack, because
-	   Asmhttpd has no functions, and thus such an attack becomes
-	   impossible.
-	Q: But isn't syscall() a function?
-	A: No, it's a macro. See doc/syscall-macro.txt for information on its
-	   usage. It's pretty much the epitome of preprocessor clusterfuck.
+-----------
+	./asmhttpd "/path/to/your/webroot"
+
+FAQ:
+----
+	Q: What makes this so secure?
+	A: Every vulnerability that allows execution of arbitrary code involves
+	   leveraging errors on the part of the programmer to overwrite return
+	   values on the stack. Asmhttpd is immune to any such vulnerability
+	   because Asmhttpd has no functions, and therefore no stack. The pages
+	   of memory backing the stack are actually unmapped after the daemon
+	   has processed its command-line arguments.
+
+	Q: How tiny is it?
+	A: The core of the daemon uses one single page of memory (4KB). It is
+	   quite literally impossible for a program to use less memory than
+	   this one does. Now of course, more memory is allocated when serving 
+	   file to clients: up to 8 pages per thread (32K). That memory is
+	   allocated using MAP_NORESERVE, which (with the default setting in
+	   /proc/sys/vm/overcommit_memory) means that pages are not allocated
+	   to back the mapping until a page fault occurs.
+	
+	Q: Why do you use a thread-based model for serving files?
+	A: The threads are *incredibly* lightweight. Since I obviously don't
+	   have to worry about portability at all, I use Linux's clone() system
+	   call (see src/serve-http.asm), which means that all the threads
+	   exist in the same virtual memory space (which is, in large part, why
+	   I don't have functions: multiple threads spawned this way would try
+	   to all use the stack at the same time and cause chaos). Essentially,
+	   the only overhead to a thread is its register file, file descriptors
+	   (there are only ever two per thread), and the 32K memory mapping.
+
 	Q: Why are all the source files #included into a single file?
 	A: The linker doesn't handle code written like this very well. Twice, I
 	   spent a significant amount of time chasing bugs that turned out to
 	   be due to the linker incorrectly optimizing out chunks of code.
+
 	Q: Why do you use NASM?
-	A: If I did this now, I would probably just have it compile with GCC,
-	   but I didn't know any better back when I wrote it.
-	Q: Can this run on 32-bit x86en?
-	A: No. It may be portable to x86-32, but I really have no idea how that
-	   works. Feel free to try.
-	Q: Do you plan on porting this to other CPU architectures?
-	A: "Porting" is really a misnomer here, since about 90% of the code
-	   would have to be rewritten. I've been meaning to learn ARM assembly
-	   for a long time now, and that might be a good way to do it. But I
-	   don't see that happening anytime in the near future...
-----------------
+	A: I learned the Intel syntax of x86 first, so NASM was the logical
+	   choice back when I wrote this (originally in fall of 2010). If I did
+	   it now, I would use GAS because the AT&T syntax is a great deal
+	   easier to understand, IMO, but I didn't know any better back when I
+	   wrote it.
+
 REPORTING BUGS:
+---------------
 	Bug reports are greatly appreciated! The most useful information is the
 	line that probably got printed in `dmesg`, which shows the address of
 	the instruction which caused the segfault. Core dumps are not of much

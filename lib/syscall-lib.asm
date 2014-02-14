@@ -94,16 +94,9 @@
 	syscall	; Invoke loadall286+
 	%ifdef __syserror_handler
 		or rax,rax ; Set flags based on the return value
-		%if __syserror_handler == 0
-			%warning "syscall() invoked with no error-checking at __FILE__:__LINE__!!"
-		%else
-			%ifdef CONGIG_DEBUG_SYSCALL_RETURNS
-				syscall_return_debug_macro __FILE__,__LINE__,$,%%0
-			%endif
-			js __syserror_handler
-		%endif
+		js __syserror_handler
 	%else
-		%fatal "__syserror_handler is not defined at __FILE__:__LINE__!!"
+		%fatal "__syserror_handler is not defined!"
 	%endif
 %endmacro ;; Yo dawg, I heard you liked macros...
 %define syscall(a,b,c,d,e,f,g) macro_do_syscall a,b,c,d,e,f,g

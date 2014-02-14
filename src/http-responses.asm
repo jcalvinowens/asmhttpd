@@ -24,7 +24,7 @@ Error413:
 	db "HTTP/1.1 413 Request Entity Too Large",0x0d,0x0a,0x0d,0x0a
 %define lenError413 41
 Error414:
-	db "HTTP/1.1 414 Requist URI Too Long",0x0d,0x0a,0x0d,0x0a
+	db "HTTP/1.1 414 Request URI Too Long",0x0d,0x0a,0x0d,0x0a
 %define lenError414 37
 Error500:
 	db "HTTP/1.1 500 Internal Server Error",0x0d,0x0a,0x0d,0x0a

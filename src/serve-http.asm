@@ -5,8 +5,8 @@ ech(HandleServeSysError)
 ;; (r8 contains file descriptor for listening socket)
 
 mov r9,CLONE_FS|CLONE_THREAD|CLONE_SIGHAND|CLONE_VM|CLONE_FILES
-mov r10d,_sys_accept
-mov r12d,_sys_clone
+mov r10d,sys_accept
+mov r12d,sys_clone
 xor rsi,rsi
 xor rdx,rdx
 
