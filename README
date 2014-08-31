@@ -6,7 +6,7 @@ HOW TO BUILD:
 
 HOW TO RUN:
 -----------
-	./asmhttpd "/path/to/your/webroot"
+	sudo ./asmhttpd "/path/to/your/webroot"
 
 FAQ:
 ----

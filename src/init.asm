@@ -2,7 +2,7 @@ ech(HandleInitSysError)
 
 ; Parse command line arguments. At the start of the program, [rsp] contains a
 ; qword that tells us how many arguments we got, and [rsp+8] contains a pointer
-; to the array of NULL-terminated strings representing the arguments.
+; to an array of pointers to NULL-terminated strings representing the arguments.
 
 ; Make sure we have 2 arguments:
 ;	0:	Executable name (we ignore this)
