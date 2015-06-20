@@ -1,4 +1,4 @@
-ech(0)	; Who shall catch the catchers?
+ech(____die)	; Who shall catch the catchers?
 
 DieClientDisconnected:
 syscall(sys_close,+rbx)
@@ -39,4 +39,5 @@ __die:
 syscall(sys_write,+rbx,+rcx,+rdx)
 syscall(sys_close,+rbx)
 syscall(sys_munmap,+rbp,32768)
+____die:
 syscall(sys_exit,-1);

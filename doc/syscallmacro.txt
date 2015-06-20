@@ -17,7 +17,7 @@ The error checking consists of:
 So, the FLAGS are set based on the error return of the syscall, which is nice.
 
 If for some reason you don't want error checking, you can do that like this:
-ech(0)
+%undef __syserror_handler
 ; do un-error-checked stuff
 ech(whatever)
 You'll get a warning during assembly for every non-error-checked syscall()

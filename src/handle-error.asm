@@ -14,5 +14,7 @@ cmp eax,-EACCES
 je DieError403	; Permission denied
 cmp eax,-ENAMETOOLONG
 je DieError414	; URI too long (although, is it?)
+cmp eax,-EPIPE
+je DieClientDisconnected
 
 jmp DieError500
