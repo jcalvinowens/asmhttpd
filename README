@@ -1,4 +1,4 @@
-asmhttpd - The tiniest, most secure webserver ever written
+asmhttpd - The tiniest webserver ever written
 ================================================================================
 HOW TO BUILD:
 -------------
@@ -10,32 +10,16 @@ HOW TO RUN:
 
 FAQ:
 ----
-	Q: What makes this so secure?
-	A: Every vulnerability that allows execution of arbitrary code involves
-	   leveraging errors on the part of the programmer to overwrite return
-	   values on the stack. Asmhttpd is immune to any such vulnerability
-	   because Asmhttpd has no functions, and therefore no stack. The pages
-	   of memory backing the stack are actually unmapped after the daemon
-	   has processed its command-line arguments.
+	Q: Why?
+	A: Just for fun, this is obviously completely impractical.
 
 	Q: How tiny is it?
 	A: The core of the daemon uses one single page of memory (4KB). It is
 	   quite literally impossible for a program to use less memory than
-	   this one does. Now of course, more memory is allocated when serving 
-	   file to clients: up to 8 pages per thread (32K). That memory is
-	   allocated using MAP_NORESERVE, which (with the default setting in
-	   /proc/sys/vm/overcommit_memory) means that pages are not allocated
-	   to back the mapping until a page fault occurs.
-	
+	   this one does. Each connection allocates an additional 32KB.
+
 	Q: Why do you use a thread-based model for serving files?
-	A: The threads are *incredibly* lightweight. Since I obviously don't
-	   have to worry about portability at all, I use Linux's clone() system
-	   call (see src/serve-http.asm), which means that all the threads
-	   exist in the same virtual memory space (which is, in large part, why
-	   I don't have functions: multiple threads spawned this way would try
-	   to all use the stack at the same time and cause chaos). Essentially,
-	   the only overhead to a thread is its register file, file descriptors
-	   (there are only ever two per thread), and the 32K memory mapping.
+	A: Because it was substantially easier to write that way.
 
 	Q: Why are all the source files #included into a single file?
 	A: The linker doesn't handle code written like this very well. Twice, I
@@ -43,11 +27,8 @@ FAQ:
 	   be due to the linker incorrectly optimizing out chunks of code.
 
 	Q: Why do you use NASM?
-	A: I learned the Intel syntax of x86 first, so NASM was the logical
-	   choice back when I wrote this (originally in fall of 2010). If I did
-	   it now, I would use GAS because the AT&T syntax is a great deal
-	   easier to understand, IMO, but I didn't know any better back when I
-	   wrote it.
+	A: It was what I was familiar with when I wrote it. NASM is actually a
+	   great little assembler, but the Intel syntax is a drag.
 
 REPORTING BUGS:
 ---------------
