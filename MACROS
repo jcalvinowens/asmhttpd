@@ -1,8 +1,9 @@
-The macro should be invoked as follows:
+
+The syscall() macro should be invoked as follows:
 	syscall(#,arg1,arg2,arg3,arg4,arg5,arg6)
 
 Error checking is built into the macro. You _MUST_ define an error-handler.
-If the syscall() macro is invoked without an error handler defined, the 
+If the syscall() macro is invoked without an error handler defined, the
 assembler will throw an error.
 
 You define error handlers like this:
@@ -24,7 +25,7 @@ You'll get a warning during assembly for every non-error-checked syscall()
 
 Do remember that if you don't define an error-handler at the beginning of a
 file, you'll just inherit the last definition from the previous file, which
-is probably not what you want. Even if it is, ech() is an assemble-time macro, 
+is probably not what you want. Even if it is, ech() is an assemble-time macro,
 so there's no real detriment to redefining it at the beginning of every file.
 This is also good in case files get re-ordered in master.asm.
 
@@ -46,3 +47,31 @@ You can change that in the following ways:
 	NULL	: Make the argument NULL (Always 64-bit, eg "xor rdi,rdi")
 	(blank) : Don't do anything for that argument (as arg2 in, "syscall(#,arg1,,arg3)"
 Note that the syscall number ("#" in the example) is also expanded in this fashion
+
+--
+
+In our thread-based model, each thread calls mmap() to grab it's own memory,
+and sets %rbp the base of that memory.
+
+The tmalloc(symbol,$bytes) macro "reserves" space in that memory. It defines
+'symbol' to be [rbp+bytes].
+
+So, for example:
+
+tmalloc(crap,8)
+tmalloc(shit,16)
+tmalloc(moreshit,32)
+
+crap is "rbp"
+shit is "rbp+8"
+moreshit is "rbp+24"
+
+This is fantastic for several reasons:
+	1) We get to refer to these things by name, instead of offsets of rbp
+	2) If we decide to add something later that needs memory, we can just
+	   add a tmalloc() for it, and everything else will magically be adjusted
+	3) We can make mmap() allocate the thread block based on how much we tmalloc()
+
+It's a little confusing, because it looks like malloc() but is a macro... but it's
+easy enough to understand, and you rarely if ever have to treat the resulting labels
+any differently than if they were defined in .data

@@ -21,11 +21,6 @@ FAQ:
 	Q: Why do you use a thread-based model for serving files?
 	A: Because it was substantially easier to write that way.
 
-	Q: Why are all the source files #included into a single file?
-	A: The linker doesn't handle code written like this very well. Twice, I
-	   spent a significant amount of time chasing bugs that turned out to
-	   be due to the linker incorrectly optimizing out chunks of code.
-
 	Q: Why do you use NASM?
 	A: It was what I was familiar with when I wrote it. NASM is actually a
 	   great little assembler, but the Intel syntax is a drag.
