@@ -34,6 +34,9 @@ global _start
 
 segment .rodata
 
+Setsock_ARGUMENT:
+	dd 0x00000001			; Turn option ON
+
 Sighand_SIGPIPE:
 	dq 0x0000000000000001		; SIG_IGN is 1
 	dq 0x0000000000000000           ; FIXME: This works, but probably isn't right...
@@ -191,11 +194,13 @@ syscall(sys_chroot)
 ; Ignore SIGPIPE
 syscall(sys_rt_sigact,13,[Sighand_SIGPIPE],NULL,8)
 
-; Create, bind to, and listen on socket
+; Create, set SO_REUSEADDR on, bind to, and listen on socket
 syscall(sys_socket,2,1,NULL)
-mov r8,rax
-syscall(sys_bind,+r8,[SocketAddress], 24)
-syscall(sys_listen,+r8,1024)
+mov rbx,rax
+
+syscall(sys_setsockopt,+rbx,SOL_SOCKET,SO_REUSEADDR,[Setsock_ARGUMENT],4)
+syscall(sys_bind,+rbx,[SocketAddress],24)
+syscall(sys_listen,+rbx,1024)
 
 ; Drop privs (Nobody)
 syscall(sys_setgid,65535)
@@ -228,8 +233,7 @@ ServeHTTP:
 
 ech(HandleServeSysError)
 
-;; (r8 contains file descriptor for listening socket)
-
+mov r8,rbx ; file descriptor for listening socket
 mov r9,CLONE_FS|CLONE_THREAD|CLONE_SIGHAND|CLONE_VM|CLONE_FILES
 mov r10d,sys_accept
 mov r12d,sys_clone

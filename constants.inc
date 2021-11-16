@@ -18,6 +18,7 @@
 %define sys_sendfile	0x00000028
 %define sys_sendto	0x0000002C
 %define sys_setgid	0x0000006A
+%define sys_setsockopt	54
 %define sys_setuid	0x00000069
 %define sys_socket	0x00000029
 %define sys_write	0x00000001
@@ -49,3 +50,7 @@
 
 ;; For sendto()
 %define MSG_MORE	0x8000;		/* TCP_CORK behavior */
+
+;; For setsockopt()
+%define SOL_SOCKET	1;
+%define SO_REUSEADDR	2;
