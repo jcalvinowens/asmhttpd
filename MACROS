@@ -45,7 +45,7 @@ You can change that in the following ways:
 	[^^arg]
 	[^^^arg]
 	NULL	: Make the argument NULL (Always 64-bit, eg "xor rdi,rdi")
-	(blank) : Don't do anything for that argument (as arg2 in, "syscall(#,arg1,,arg3)"
+
 Note that the syscall number ("#" in the example) is also expanded in this fashion
 
 --

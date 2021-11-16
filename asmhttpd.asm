@@ -186,22 +186,20 @@ jmp .FindNULL
 
 ; Change and chroot to the webroot
 syscall(sys_chdir,[r11+rcx+1])
-syscall(sys_chroot,)
+syscall(sys_chroot)
 
 ; Ignore SIGPIPE
 syscall(sys_rt_sigact,13,[Sighand_SIGPIPE],NULL,8)
 
 ; Create, bind to, and listen on socket
 syscall(sys_socket,2,1,NULL)
-mov rdi,rax
-syscall(sys_bind,,[SocketAddress], 24)
-syscall(sys_listen,,1024)
-
-mov r8,rdi
+mov r8,rax
+syscall(sys_bind,+r8,[SocketAddress], 24)
+syscall(sys_listen,+r8,1024)
 
 ; Drop privs (Nobody)
 syscall(sys_setgid,65535)
-syscall(sys_setuid,)
+syscall(sys_setuid)
 
 ; .rodata is higher than .text in virtual memory. Calculate the address of the
 ; first unused page after .data
@@ -219,7 +217,7 @@ dec rsi
 shl rsi,12
 
 ; Do the munmap() call. This unmaps the stack, which we no longer need.
-syscall(sys_munmap,,)
+syscall(sys_munmap)
 
 ; Fork away from calling TTY
 syscall(sys_fork)
@@ -243,7 +241,7 @@ xor rdx,rdx
 
 syscall(+r10,+r8)
 mov rbx,rax
-syscall(+r12,+r9,)
+syscall(+r12,+r9)
 jnz .AcceptNextRequest
 
 ;; (rbx contains client connection file descriptor)
@@ -444,7 +442,7 @@ mov dword [rdi], 0x0a0d0a0d	; Terminate the HTTP response
 
 lea rdx,[rdi+4]	; Address from which to send response plus 4...
 sub rdx,rsp	; ...and subtract the end to get the length
-syscall(sys_sendto,+rbx,[+rsp],,MSG_MORE,NULL,NULL)
+syscall(sys_sendto,+rbx,[+rsp],+rdx,MSG_MORE,NULL,NULL)
 
 keep_sending:
 syscall(sys_sendfile,+rbx,+r13,NULL,+r12)
