@@ -1,37 +1,32 @@
 asmhttpd - The tiniest webserver ever written
-================================================================================
+
 HOW TO BUILD:
 -------------
+
 	Just run "make". You will need NASM on your system.
 
 HOW TO RUN:
 -----------
-	sudo ./asmhttpd "/path/to/your/webroot"
 
-FAQ:
-----
-	Q: Why?
-	A: Just for fun, this is obviously completely impractical.
+	./asmhttpd /path/to/your/webroot
+	sudo ./asmhttpd /path/to/your/webroot
 
-	Q: How tiny is it?
-	A: The core of the daemon uses one single page of memory (4KB). It is
-	   quite literally impossible for a program to use less memory than
-	   this one does. Each connection allocates an additional 4KB.
+If run as root, it will listen on port 80. Otherwise, it will use port 8080.
 
-	Q: Why do you use a thread-based model for serving files?
-	A: Because it was substantially easier to write that way.
-
-	Q: Why do you use NASM?
-	A: It was what I was familiar with when I wrote it. NASM is actually a
-	   great little assembler, but the Intel syntax is a drag.
-
-REPORTING BUGS:
+HOW TINY IS IT?
 ---------------
-	Bug reports are greatly appreciated! The most useful information is the
-	line that probably got printed in `dmesg`, which shows the address of
-	the instruction which caused the segfault. Core dumps are not of much
-	use, but send them if you have them. If the bug doesn't crash the
-	daemon, send me a very detailed description of what you did to cause
-	the issue.
 
-	My E-Mail is: jcalvinowens@gmail.com
+The entire text and data fit on a single 4K page:
+
+  asmhttpd:     file format elf64-x86-64
+  0 .text         00000692  0000000000401000  0000000000401000  00001000  2**4
+  1 .rodata       000001b6  0000000000402000  0000000000402000  00002000  2**2
+
+...but how many pages the program actually uses in practice depends. On my
+laptop, it ends up consuming three real pages:
+
+  00400000-00401000 r--p 00000000 00:16 1913284 /home/calvinow/git/asmhttpd/asmhttpd
+  00401000-00402000 r-xp 00001000 00:16 1913284 /home/calvinow/git/asmhttpd/asmhttpd
+  00402000-00403000 r--p 00002000 00:16 1913284 /home/calvinow/git/asmhttpd/asmhttpd
+
+Each client consumes one additional 4K page.
