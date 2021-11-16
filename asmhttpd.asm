@@ -50,6 +50,15 @@ SocketAddress:
 	dd 0x00000000
 	dd 0x00000000			; Not sure what this last null dword is for...
 
+SocketAddressNotRoot:
+	dw 0x0002			; AF_INET is 2 (AF_INET6 is 0xa)
+	dw 0x901F			; TCP Port we want to bind to (:8080) (Net byte ordering)
+	dd 0x00000000                   ; Address to bind to (0.0.0.0 or ::)
+	dd 0x00000000
+	dd 0x00000000
+	dd 0x00000000
+	dd 0x00000000			; Not sure what this last null dword is for...
+
 DecAsciiConvTable:
 	db 0x30,0x31,0x21,0x32,0x33,0x21,0x34,0x21,0x35,0x36,0x21,0x37,0x38,0x21,0x39,0x21
 
@@ -88,7 +97,7 @@ Error501:
 	db "HTTP/1.1 501 Not Implemented",0x0d,0x0a,0x0d,0x0a
 %define lenError501 32
 HelpMessage:
-	db "Usage (run as root): ./asmhttpd <webroot>",0x0a
+	db "Usage: ./asmhttpd <webroot>",0x0a
 %define lenHelpMessage 42
 
 DATASEGMENT_END: db 0x00
@@ -191,27 +200,33 @@ inc rcx
 jmp .FindNULL
 
 .GotNULL:
-; Okay, we got the webroot argument. Even if somebody is screwing with us, we
-; know it will be NULL-terminated, so just pass it to chdir() and chroot()
-
-; Change and chroot to the webroot
-syscall(sys_chdir,[r11+rcx+1])
-syscall(sys_chroot)
+; Okay, we got the webroot argument.
+syscall(sys_open,[r11+rcx+1],O_DIRECTORY,NULL)
+mov r15,rax	; Save webroot file descriptor
 
 ; Ignore SIGPIPE
 syscall(sys_rt_sigact,13,[Sighand_SIGPIPE],NULL,8)
 
-; Create, set SO_REUSEADDR on, bind to, and listen on socket
+; Create and set SO_REUSEADDR on the socket
 syscall(sys_socket,2,1,NULL)
 mov rbx,rax
 
 syscall(sys_setsockopt,+rbx,SOL_SOCKET,SO_REUSEADDR,[Setsock_ARGUMENT],4)
-syscall(sys_bind,+rbx,[SocketAddress],24)
-syscall(sys_listen,+rbx,1024)
+syscall(sys_getuid)
+test rax,rax
+jnz .NotRoot
 
-; Drop privs (Nobody)
+; Bind, and drop privs (nobody)
+syscall(sys_bind,+rbx,[SocketAddress],24)
 syscall(sys_setgid,65535)
 syscall(sys_setuid)
+jmp .OverNotRoot
+
+.NotRoot:
+syscall(sys_bind,+rbx,[SocketAddressNotRoot],24)
+
+.OverNotRoot:
+syscall(sys_listen,+rbx,1024)
 
 ; .rodata is higher than .text in virtual memory. Calculate the address of the
 ; first unused page after .data
@@ -304,7 +319,6 @@ jz DieError414	; If zero, send 412 REQUEST URI TOO LARGE
 jmp ReceiveRequest	; Go back up and wait for more data
 
 .FoundTerminator:
-lea r15,[rdi+3]		; Store the last byte of the request
 lea r14,[r9+rax]	; Store last byte received from client
 
 ; Skip past the METHOD specification, find the start of the URI:
@@ -381,7 +395,11 @@ loop WriteNULLs		; (We really only need one NULL - this is to aid in debugging)
 
 ExpandDone:
 
-syscall(sys_open,+r13,NULL,NULL)
+tmalloc(OpenAtStruct,24)
+mov qword [OpenAtStruct],0
+mov qword [OpenAtStruct+8],0
+mov qword [OpenAtStruct+16],RESOLVE_IN_ROOT
+syscall(sys_openat2,+r15,+r13,[OpenAtStruct],lenOpenAtStruct)
 mov r13,rax	; Save file descriptor
 
 ech(HandleGeneralSysErrorAfterOpen)	; Now if we crash we have to close the file to

@@ -8,10 +8,12 @@
 %define sys_exit	0x0000003C
 %define sys_fork	0x00000039
 %define sys_fstat	0x00000005
+%define sys_getuid	0x00000066
 %define sys_listen	0x00000032
 %define sys_mmap	0x00000009
 %define sys_munmap	0x0000000B
 %define sys_open	0x00000002
+%define sys_openat2	437
 %define sys_poll	0x00000007
 %define sys_read	0x00000000
 %define sys_rt_sigact	0x0000000D
@@ -54,3 +56,9 @@
 ;; For setsockopt()
 %define SOL_SOCKET	1;
 %define SO_REUSEADDR	2;
+
+;; For open()
+%define O_DIRECTORY     0x10000;
+
+;; For openat2()
+%define RESOLVE_IN_ROOT	0x10;
