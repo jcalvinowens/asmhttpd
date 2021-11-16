@@ -16,7 +16,7 @@ FAQ:
 	Q: How tiny is it?
 	A: The core of the daemon uses one single page of memory (4KB). It is
 	   quite literally impossible for a program to use less memory than
-	   this one does. Each connection allocates an additional 32KB.
+	   this one does. Each connection allocates an additional 4KB.
 
 	Q: Why do you use a thread-based model for serving files?
 	A: Because it was substantially easier to write that way.
