@@ -7,6 +7,7 @@
 %define sys_close	0x00000003
 %define sys_exit	0x0000003C
 %define sys_fork	0x00000039
+%define sys_fstat	0x00000005
 %define sys_listen	0x00000032
 %define sys_mmap	0x00000009
 %define sys_munmap	0x0000000B
@@ -19,7 +20,6 @@
 %define sys_setgid	0x0000006A
 %define sys_setuid	0x00000069
 %define sys_socket	0x00000029
-%define sys_stat	0x00000004
 %define sys_write	0x00000001
 
 ;; errno

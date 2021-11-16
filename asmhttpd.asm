@@ -370,9 +370,15 @@ loop WriteNULLs		; (We really only need one NULL - this is to aid in debugging)
 
 ExpandDone:
 
+syscall(sys_open,+r13,NULL,NULL)
+mov r13,rax	; Save file descriptor
+
+ech(HandleGeneralSysErrorAfterOpen)	; Now if we crash we have to close the file to
+					; avoid leaking file descriptors
+
 tmalloc(StatStruct,144)
 
-syscall(sys_stat,+r13,[StatStruct])
+syscall(sys_fstat,+r13,[StatStruct])
 
 ; Make sure we have a regular file or a symlink
 mov r12w,[StatStruct+24]	; Get the file mode
@@ -381,12 +387,6 @@ cmp r12w,2
 jne DieError403
 
 mov r12,[StatStruct+48]	; Get the file size out of the struct from stat()
-
-syscall(sys_open,+r13,NULL,NULL)
-mov r13,rax	; Save file descriptor
-
-ech(HandleGeneralSysErrorAfterOpen)	; Now if we crash we have to close the file to
-					; avoid leaking file descriptors
 
 lea rsp,[rbp+thread_memory_offset]	; Get scratch space, store it in rsp for awhile
 
