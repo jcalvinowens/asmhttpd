@@ -87,6 +87,9 @@ Error500:
 Error501:
 	db "HTTP/1.1 501 Not Implemented",0x0d,0x0a,0x0d,0x0a
 %define lenError501 32
+HelpMessage:
+	db "Usage (run as root): ./asmhttpd <webroot>",0x0a
+%define lenHelpMessage 42
 
 DATASEGMENT_END: db 0x00
 
@@ -129,6 +132,10 @@ lea rcx,[Error400]
 mov edx,lenError400
 jmp __die
 
+PrintHelpMessageAndDie:
+syscall(sys_write,2,[HelpMessage],lenHelpMessage)
+jmp ____die
+
 __die:
 syscall(sys_write,+rbx,+rcx,+rdx)
 syscall(sys_close,+rbx)
@@ -170,7 +177,7 @@ ech(HandleInitSysError)
 ;	1:	Webroot
 mov r11,[rsp]
 cmp r11,2
-jne HandleInitSysError
+jne PrintHelpMessageAndDie
 
 ; Okay, find the arg
 mov r11,[rsp+8]
