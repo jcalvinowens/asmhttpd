@@ -39,7 +39,7 @@ Setsock_ARGUMENT:
 
 Sighand_SIGPIPE:
 	dq 0x0000000000000001		; SIG_IGN is 1
-	dq 0x0000000000000000           ; FIXME: This works, but probably isn't right...
+	dq 0x0000000000000000
 
 SocketAddress:
 	dw 0x0002			; AF_INET is 2 (AF_INET6 is 0xa)
@@ -48,7 +48,7 @@ SocketAddress:
 	dd 0x00000000
 	dd 0x00000000
 	dd 0x00000000
-	dd 0x00000000			; Not sure what this last null dword is for...
+	dd 0x00000000
 
 SocketAddressNotRoot:
 	dw 0x0002			; AF_INET is 2 (AF_INET6 is 0xa)
@@ -57,7 +57,7 @@ SocketAddressNotRoot:
 	dd 0x00000000
 	dd 0x00000000
 	dd 0x00000000
-	dd 0x00000000			; Not sure what this last null dword is for...
+	dd 0x00000000
 
 DecAsciiConvTable:
 	db 0x30,0x31,0x21,0x32,0x33,0x21,0x34,0x21,0x35,0x36,0x21,0x37,0x38,0x21,0x39,0x21
@@ -178,8 +178,8 @@ _start:
 ech(HandleInitSysError)
 
 ; Parse command line arguments. At the start of the program, [rsp] contains a
-; qword that tells us how many arguments we got, and [rsp+8] contains a pointer
-; to an array of pointers to NULL-terminated strings representing the arguments.
+; qword that tells us how many arguments we got, and [rsp+8] is the beginning of
+; a list of pointers to the NUL-terminated argument strings.
 
 ; Make sure we have 2 arguments:
 ;	0:	Executable name (we ignore this)
@@ -188,20 +188,7 @@ mov r11,[rsp]
 cmp r11,2
 jne PrintHelpMessageAndDie
 
-; Okay, find the arg
-mov r11,[rsp+8]
-xor rcx,rcx
-
-.FindNULL:
-movzx r12, byte [r11+rcx]
-test r12,r12
-jz .GotNULL
-inc rcx
-jmp .FindNULL
-
-.GotNULL:
-; Okay, we got the webroot argument.
-syscall(sys_open,[r11+rcx+1],O_DIRECTORY,NULL)
+syscall(sys_open,+[rsp+8*1+8],O_DIRECTORY,NULL)
 mov r15,rax	; Save webroot file descriptor
 
 ; Ignore SIGPIPE
