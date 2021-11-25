@@ -16,17 +16,18 @@ If run as root, it will listen on port 80. Otherwise, it will use port 8080.
 HOW TINY IS IT?
 ---------------
 
-The entire text and data fit on a single 4K page:
+The entire text and data can fit on a single 4K page:
 
   asmhttpd:     file format elf64-x86-64
   0 .text         00000692  0000000000401000  0000000000401000  00001000  2**4
   1 .rodata       000001b6  0000000000402000  0000000000402000  00002000  2**2
 
-...but how many pages the program actually uses in practice depends. On my
-laptop, it ends up consuming three real pages:
+...but how many pages the program actually uses in practice depends. Generally,
+you'll have a non-executable page for .rodata and an executable page for .text,
+something like this:
 
-  00400000-00401000 r--p 00000000 00:16 1913284 /home/calvinow/git/asmhttpd/asmhttpd
-  00401000-00402000 r-xp 00001000 00:16 1913284 /home/calvinow/git/asmhttpd/asmhttpd
-  00402000-00403000 r--p 00002000 00:16 1913284 /home/calvinow/git/asmhttpd/asmhttpd
+  00401000-00402000 r-xp 00001000 00:16 2240409 asmhttpd
+  00402000-00403000 r--p 00002000 00:16 2240409 asmhttpd
 
-Each client consumes one additional 4K page.
+The code could be rewritten to pack itself into one page at runtime. Each client
+currently consumes one additional 4K page.

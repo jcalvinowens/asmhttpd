@@ -34,6 +34,8 @@ global _start
 
 segment .rodata
 
+DATASEGMENT_BEGIN:
+
 Setsock_ARGUMENT:
 	dd 0x00000001			; Turn option ON
 
@@ -100,9 +102,9 @@ HelpMessage:
 	db "Usage: ./asmhttpd <webroot>",0x0a
 %define lenHelpMessage 42
 
-DATASEGMENT_END: db 0x00
-
 segment .text
+
+TEXTSEGMENT_BEGIN:
 
 ech(____die)	; Who shall catch the catchers?
 
@@ -215,22 +217,21 @@ syscall(sys_bind,+rbx,[SocketAddressNotRoot],24)
 .OverNotRoot:
 syscall(sys_listen,+rbx,1024)
 
-; .rodata is higher than .text in virtual memory. Calculate the address of the
-; first unused page after .data
-lea rdi,[DATASEGMENT_END]
-shr rdi,12
-inc rdi
-shl rdi,12
+; Now, we can unmap everything but our two pages (including the stack!)
+; If you use L5 pagetables, change the shift by 47 to 56
 
-; Now, calculate the page-size-aligned length from the end of .data to the top
-; of the userspace addresses (See: http://en.wikipedia.org/wiki/X86-64)
-mov rsi,0x00007fffffffffff
+; Unmap everything after .rodata
+lea rdi,[DATASEGMENT_BEGIN+4096]
+mov rsi,1
+shl rsi,47
 sub rsi,rdi
-shr rsi,12
-dec rsi
-shl rsi,12
+sub rsi,4096	; Highest page is off-limits
+syscall(sys_munmap)
 
-; Do the munmap() call. This unmaps the stack, which we no longer need.
+; Unmap everything before .text
+xor rdi,rdi
+lea rsi,[TEXTSEGMENT_BEGIN]
+dec rsi
 syscall(sys_munmap)
 
 ; Fork away from calling TTY
@@ -469,4 +470,4 @@ syscall(sys_close,+rbx)
 syscall(sys_munmap,+rbp,THREAD_MEM_SIZE)
 syscall(sys_exit,NULL)
 
-ud2					; Force SIGILL if code runs away somehow
+ud2	; SIGILL
