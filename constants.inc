@@ -1,29 +1,29 @@
 ;; syscalls
-%define sys_accept	0x0000002B
-%define sys_bind	0x00000031
-%define sys_chdir	0x00000050
-%define sys_chroot	0x000000A1
-%define sys_clone	0x00000038
-%define sys_close	0x00000003
-%define sys_exit	0x0000003C
-%define sys_fork	0x00000039
-%define sys_fstat	0x00000005
-%define sys_getuid	0x00000066
-%define sys_listen	0x00000032
-%define sys_mmap	0x00000009
-%define sys_munmap	0x0000000B
-%define sys_open	0x00000002
+%define sys_accept	43
+%define sys_bind	49
+%define sys_chdir	80
+%define sys_chroot	161
+%define sys_clone	56
+%define sys_close	3
+%define sys_exit	60
+%define sys_fork	57
+%define sys_fstat	5
+%define sys_getuid	102
+%define sys_listen	50
+%define sys_mmap	9
+%define sys_munmap	11
+%define sys_open	2
 %define sys_openat2	437
-%define sys_poll	0x00000007
-%define sys_read	0x00000000
-%define sys_rt_sigact	0x0000000D
-%define sys_sendfile	0x00000028
-%define sys_sendto	0x0000002C
-%define sys_setgid	0x0000006A
+%define sys_poll	7
+%define sys_read	0
+%define sys_rt_sigact	13
+%define sys_sendfile	40
+%define sys_sendto	44
+%define sys_setgid	106
 %define sys_setsockopt	54
-%define sys_setuid	0x00000069
-%define sys_socket	0x00000029
-%define sys_write	0x00000001
+%define sys_setuid	105
+%define sys_socket	41
+%define sys_write	1
 
 ;; errno
 %define	EPERM		1;	/* Operation not permitted */

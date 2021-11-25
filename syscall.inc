@@ -1,3 +1,5 @@
+; See the MACROS file for a description of how this monstrosity works
+
 ;; r64,r32,r16,r8,arg
 %macro load_syscall_argument 0-*
 	%if %0 == 4
