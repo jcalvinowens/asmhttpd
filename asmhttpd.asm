@@ -274,7 +274,7 @@ jnz .AcceptNextRequest
 HandleConnection:
 ech(HandleGeneralSysError)
 
-syscall(sys_mmap,NULL,THREAD_MEM_SIZE,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS|MAP_NORESERVE,NULL,NULL)
+syscall(sys_mmap,NULL,THREAD_MEM_SIZE,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS|MAP_POPULATE,NULL,NULL)
 mov rbp,rax	; Store offset for tmalloc() macro
 
 tmalloc(PollStruct,8)

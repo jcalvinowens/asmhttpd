@@ -44,7 +44,6 @@
 %define PROT_WRITE	0x2;		/* Page can be written.  */
 %define MAP_PRIVATE	0x02;		/* Changes are private.  */
 %define MAP_ANONYMOUS	0x20;		/* Don't use a file.  */
-%define MAP_NORESERVE	0x04000;	/* Don't check for reservations.  */
 %define MAP_POPULATE	0x08000;	/* Populate (prefault) pagetables.  */
 
 ;; For poll()
