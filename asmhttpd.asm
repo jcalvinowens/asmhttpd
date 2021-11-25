@@ -388,10 +388,7 @@ jne DoCopying	; ...do it again
 
 mov rcx,r9	; Use the number of %xx's we unescaped as a counter
 xor dx,dx	; Zero dx so we can write NULL words
-
-WriteNULLs:
-mov [rdi+rcx*2-2],dx	; Write NULLs over the extra junk copied backwards at the end
-loop WriteNULLs		; (We really only need one NULL - this is to aid in debugging)
+mov [rdi],dx	; NUL terminate the (now shorter) string
 
 ExpandDone:
 
