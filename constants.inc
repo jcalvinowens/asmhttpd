@@ -31,6 +31,7 @@
 %define	EACCES		13;	/* Permission denied */
 %define	EPIPE		32;	/* Broken pipe */
 %define	ENAMETOOLONG	36;	/* File name too long */
+%define	ENOSYS		38;	/* Invalid system call number */
 
 ;; For clone()
 %define CLONE_VM	0x00000100; /* Set if VM shared between processes.  */

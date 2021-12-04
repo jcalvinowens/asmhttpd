@@ -100,9 +100,15 @@ Error500:
 Error501:
 	db "HTTP/1.1 501 Not Implemented",0x0d,0x0a,0x0d,0x0a
 %define lenError501 32
+
+Error599:
+	db "HTTP/1.1 599 System Call Not Implemented",0x0d,0x0a,0x0d,0x0a
+	db "Your kernel is probably missing openat2(): Upgrade to >= 5.6",0x0a
+%define lenError599 105
+
 HelpMessage:
 	db "Usage: ./asmhttpd <webroot>",0x0a
-%define lenHelpMessage 42
+%define lenHelpMessage 28
 
 ech(____die)	; Who shall catch the catchers?
 
@@ -141,6 +147,11 @@ lea rcx,[Error400]
 mov edx,lenError400
 jmp __die
 
+DieError599:
+lea rcx,[Error599]
+mov edx,lenError599
+jmp __die
+
 PrintHelpMessageAndDie:
 syscall(sys_write,2,[HelpMessage],lenHelpMessage)
 jmp ____die
@@ -170,6 +181,8 @@ cmp eax,-ENAMETOOLONG
 je DieError414	; URI too long (although, is it?)
 cmp eax,-EPIPE
 je DieClientDisconnected
+cmp eax,-ENOSYS
+je DieError599
 
 jmp DieError500
 
