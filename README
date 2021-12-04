@@ -16,18 +16,16 @@ If run as root, it will listen on port 80. Otherwise, it will use port 8080.
 HOW TINY IS IT?
 ---------------
 
-The entire text and data can fit on a single 4K page:
+The entire text and data fit on a single 4K page:
 
-  asmhttpd:     file format elf64-x86-64
-  0 .text         00000692  0000000000401000  0000000000401000  00001000  2**4
-  1 .rodata       000001b6  0000000000402000  0000000000402000  00002000  2**2
+  {0}[calvin ~] cat /proc/$(pgrep -n asmhttpd)/maps
+  00401000-00402000 r-xp 00001000 00:16 2483272 asmhttpd
 
-...but how many pages the program actually uses in practice depends. Generally,
-you'll have a non-executable page for .rodata and an executable page for .text,
-something like this:
+Each client allocates an additional 4K page and a thread while connected.
 
-  00401000-00402000 r-xp 00001000 00:16 2240409 asmhttpd
-  00402000-00403000 r--p 00002000 00:16 2240409 asmhttpd
+The code is written in a monolithic "branching tree" style with no functions,
+and uses registers for all local variables. RAM is only used for buffering the
+HTTP request, and for building structures necessary for system calls.
 
-The code could be rewritten to pack itself into one page at runtime. Each client
-currently consumes one additional 4K page.
+Because there is no stack, and the targets of all branch instructions are
+constants, traditional buffer overflow exploits are impossible.

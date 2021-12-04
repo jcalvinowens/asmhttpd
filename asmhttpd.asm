@@ -32,9 +32,9 @@ global _start
 %define CLIENT_TIMEOUT_MS 60000
 %define NAME_MAX 254
 
-segment .rodata
+segment .text
 
-DATASEGMENT_BEGIN:
+SEGMENT_BEGIN:
 
 Setsock_ARGUMENT:
 	dd 0x00000001			; Turn option ON
@@ -101,10 +101,6 @@ Error501:
 HelpMessage:
 	db "Usage: ./asmhttpd <webroot>",0x0a
 %define lenHelpMessage 42
-
-segment .text
-
-TEXTSEGMENT_BEGIN:
 
 ech(____die)	; Who shall catch the catchers?
 
@@ -220,8 +216,12 @@ syscall(sys_listen,+rbx,1024)
 ; Now, we can unmap everything but our two pages (including the stack!)
 ; If you use L5 pagetables, change the shift by 47 to 56
 
-; Unmap everything after .rodata
-lea rdi,[DATASEGMENT_BEGIN+4096]
+; Unmap everything after .text
+lea rdi,[SEGMENT_BEGIN]
+shr rdi,12
+inc rdi
+shl rdi,12
+
 mov rsi,1
 shl rsi,47
 sub rsi,rdi
@@ -229,9 +229,12 @@ sub rsi,4096	; Highest page is off-limits
 syscall(sys_munmap)
 
 ; Unmap everything before .text
-xor rdi,rdi
-lea rsi,[TEXTSEGMENT_BEGIN]
+mov rsi,rdi
+shr rsi,12
 dec rsi
+shl rsi,12
+dec rsi
+xor rdi,rdi
 syscall(sys_munmap)
 
 ; Fork away from calling TTY
