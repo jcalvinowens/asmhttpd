@@ -289,11 +289,11 @@ tmalloc(PollStruct,8)
 mov [PollStruct],rbx
 mov dword [PollStruct+4],POLLIN
 
-tmalloc(ClientRequest,1024)
+tmalloc(ClientRequest,GLOBAL_MAX_HTTP_REQLEN)
 
 ; Load offset and counter for receieve loop
 lea r9,[ClientRequest]
-mov r10d,1024
+mov r10d,GLOBAL_MAX_HTTP_REQLEN
 
 ReceiveRequest:
 
@@ -303,9 +303,19 @@ jz DieError408
 syscall(sys_read,+rbx,+r9,+r10)
 jz DieClientDisconnected
 
-cmp rax,18		; If we got too few bytes to be valid...
-jl ReceiveRequest	; ...go wait for more.
+; Did we get enough data to be valid?
+mov ecx,GLOBAL_MAX_HTTP_REQLEN
+sub rcx,r10
+add rcx,rax
+cmp rcx,18
+jge GotEnough
 
+; Need to wait for more, adjust offsets and block again
+add r9,rax
+sub r10,rax
+jmp ReceiveRequest
+
+GotEnough:
 mov esi,0x0a0d0a0d
 lea rdi,[r9+rax-4]
 lea r8,[ClientRequest]
@@ -337,7 +347,7 @@ jne DieError400		; Go thou and fuck with me no more
 mov r13,rdi
 
 ; NULL-terminate the filename
-mov ecx,1024
+mov ecx,GLOBAL_MAX_HTTP_REQLEN
 repne scasb
 jne DieError400		; This should never happen
 
