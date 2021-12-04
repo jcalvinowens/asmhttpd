@@ -1,3 +1,5 @@
+; vim: syntax=nasm
+;
 ; asmhttpd: A minimalist HTTP webserver for Linux, written in x86_64 assembly.
 ;
 ; Copyright (C) 2012 Calvin Owens <jcalvinowens@gmail.com>
