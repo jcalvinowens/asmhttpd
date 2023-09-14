@@ -6,7 +6,6 @@
 %define sys_clone	56
 %define sys_close	3
 %define sys_exit	60
-%define sys_fork	57
 %define sys_fstat	5
 %define sys_getuid	102
 %define sys_listen	50

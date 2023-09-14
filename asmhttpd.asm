@@ -195,13 +195,13 @@ ech(HandleInitSysError)
 ; a list of pointers to the NUL-terminated argument strings.
 
 ; Make sure we have 2 arguments:
-;	0:	Executable name (we ignore this)
-;	1:	Webroot
+;	0:	[rsp+8*1]	Executable name (we ignore this)
+;	1:	[rsp+8*2]	Webroot
 mov r11,[rsp]
 cmp r11,2
 jne PrintHelpMessageAndDie
 
-syscall(sys_open,+[rsp+8*1+8],O_DIRECTORY,NULL)
+syscall(sys_open,+[rsp+8*2],O_DIRECTORY,NULL)
 mov r15,rax	; Save webroot file descriptor
 
 ; Ignore SIGPIPE
@@ -228,15 +228,15 @@ syscall(sys_bind,+rbx,[SocketAddressNotRoot],24)
 .OverNotRoot:
 syscall(sys_listen,+rbx,1024)
 
-; Now, we can unmap everything but our two pages (including the stack!)
+; Now, we can unmap everything but our single page, including the stack!
 ; If you use L5 pagetables, change the shift by 47 to 56
 
-; Unmap everything after .text
 lea rdi,[SEGMENT_BEGIN]
 shr rdi,12
 inc rdi
 shl rdi,12
 
+; Unmap everything after .text
 mov rsi,1
 shl rsi,47
 sub rsi,rdi
@@ -251,11 +251,6 @@ shl rsi,12
 dec rsi
 xor rdi,rdi
 syscall(sys_munmap)
-
-; Fork away from calling TTY
-;syscall(sys_fork)
-;jz ServeHTTP
-;syscall(sys_exit,NULL)
 
 ServeHTTP:
 
